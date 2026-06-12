@@ -337,3 +337,30 @@ exports.getMonthlyRevenue = (req, res) => {
   );
 
 };
+/* ================= PAYMENT HISTORY ================= */
+
+exports.getPayments = (req, res) => {
+
+  db.all(
+    "SELECT * FROM payments ORDER BY paymentDate DESC",
+    [],
+    (err, rows) => {
+
+      if (err) {
+
+        console.log("================================");
+        console.log("PAYMENTS ERROR:");
+        console.log(err);
+        console.log("================================");
+
+        return res.status(500).json(err);
+      }
+
+      res.json(rows);
+
+    }
+  );
+
+};
+    
+  
