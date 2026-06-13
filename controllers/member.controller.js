@@ -301,49 +301,33 @@ exports.getDashboardStats = (req, res) => {
 };
 
 /* ================= MONTHLY REVENUE ================= */
-/* ================= MONTHLY REVENUE ================= */
-
 exports.getMonthlyRevenue = (req, res) => {
 
   db.all(
-    `
-    SELECT *
-    FROM payments
-    ORDER BY paymentDate ASC
-    `,
+    "SELECT * FROM payments",
     [],
     (err, rows) => {
 
       if (err) {
-
-        console.log(
-          "MONTHLY REVENUE ERROR:",
-          err.message
-        );
-
         return res.status(500).json(err);
-
       }
+
+      console.log("PAYMENTS TABLE:", rows);
 
       const revenue = {};
 
       rows.forEach((payment) => {
 
-        if (!payment.paymentDate) return;
-
         const month =
           payment.paymentDate.substring(0, 7);
 
-        if (!revenue[month]) {
-
-          revenue[month] = 0;
-
-        }
-
-        revenue[month] +=
-          Number(payment.amount || 0);
+        revenue[month] =
+          (revenue[month] || 0) +
+          Number(payment.amount);
 
       });
+
+      console.log("REVENUE:", revenue);
 
       res.json(revenue);
 
@@ -351,7 +335,6 @@ exports.getMonthlyRevenue = (req, res) => {
   );
 
 };
-
 /* ================= PAYMENT HISTORY ================= */
 
 exports.getPayments = (req, res) => {
