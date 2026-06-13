@@ -307,27 +307,32 @@ exports.getDashboardStats = (req, res) => {
 exports.getMonthlyRevenue = (req, res) => {
 
   db.all(
-    "SELECT plan, startDate FROM members WHERE deleted = 0",
+    `
+    SELECT amount, paymentDate
+    FROM payments
+    ORDER BY paymentDate ASC
+    `,
     [],
     (err, rows) => {
 
-      if (err) return res.status(500).json(err);
+      if (err) {
+        return res.status(500).json(err);
+      }
 
       const revenue = {};
 
-      rows.forEach(member => {
+      rows.forEach(payment => {
 
-        if (!member.startDate) return;
+        if (!payment.paymentDate) return;
 
-        const month = member.startDate.substring(0, 7); // YYYY-MM
-
-        const amount = planPrices[member.plan] || 0;
+        const month =
+          payment.paymentDate.substring(0, 7);
 
         if (!revenue[month]) {
           revenue[month] = 0;
         }
 
-        revenue[month] += amount;
+        revenue[month] += payment.amount || 0;
 
       });
 
@@ -362,5 +367,3 @@ exports.getPayments = (req, res) => {
   );
 
 };
-    
-  
