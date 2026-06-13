@@ -13,23 +13,34 @@ function parseTimestamp(ts) {
 
   try {
 
-    // format: 26/08/2024 07:36:38
     if (ts.includes("/")) {
 
       const [datePart, timePart] = ts.split(" ");
-      const [day, month, year] = datePart.split("/").map(Number);
+      const [day, month, year] =
+        datePart.split("/").map(Number);
 
-      let hour = 0, minute = 0, second = 0;
+      let hour = 0;
+      let minute = 0;
+      let second = 0;
 
       if (timePart) {
-        [hour, minute, second] = timePart.split(":").map(Number);
+
+        [hour, minute, second] =
+          timePart.split(":").map(Number);
+
       }
 
-      return new Date(year, month - 1, day, hour, minute, second);
+      return new Date(
+        year,
+        month - 1,
+        day,
+        hour,
+        minute,
+        second
+      );
 
     }
 
-    // fallback parser
     const d = new Date(ts);
 
     if (!isNaN(d)) return d;
@@ -44,25 +55,29 @@ function parseTimestamp(ts) {
 
 }
 
-
 async function syncGoogleSheet() {
 
   try {
 
     console.log("SYNC STARTED");
 
-    const response = await axios.get(SHEET_URL);
+    const response =
+      await axios.get(SHEET_URL);
 
-    const records = parse(response.data, {
-      columns: true,
-      skip_empty_lines: true
-    });
+    const records = parse(
+      response.data,
+      {
+        columns: true,
+        skip_empty_lines: true
+      }
+    );
 
-    console.log("ROWS FOUND:", records.length);
+    console.log(
+      "ROWS FOUND:",
+      records.length
+    );
 
     records.forEach((row) => {
-
-      /* Normalize column names */
 
       const name =
         row["Name"] ||
@@ -84,33 +99,64 @@ async function syncGoogleSheet() {
         row["Timestamp"] ||
         row[" Time stamp"];
 
-      if (!name || !phone || !timestamp) {
-        console.log("SKIPPED:", row);
+      if (
+        !name ||
+        !phone ||
+        !timestamp
+      ) {
         return;
       }
 
-      const start = parseTimestamp(timestamp);
+      const start =
+        parseTimestamp(timestamp);
 
       if (!start) return;
 
-      const expiry = new Date(start);
-      expiry.setMonth(expiry.getMonth() + plan);
+      const expiry =
+        new Date(start);
 
-      const startDate = start.toISOString().split("T")[0];
-      const expiryDate = expiry.toISOString().split("T")[0];
+      expiry.setMonth(
+        expiry.getMonth() + plan
+      );
+
+      const startDate =
+        start.toISOString().split("T")[0];
+
+      const expiryDate =
+        expiry.toISOString().split("T")[0];
 
       db.run(
-        `INSERT INTO members
-        (name, phone, plan, startDate, expiryDate, deleted)
+        `
+        INSERT INTO members
+        (
+          name,
+          phone,
+          plan,
+          startDate,
+          expiryDate,
+          deleted
+        )
         VALUES (?, ?, ?, ?, ?, 0)
-        ON CONFLICT(phone) DO UPDATE SET
-        name=excluded.name,
-        plan=excluded.plan,
-        startDate=excluded.startDate,
-        expiryDate=excluded.expiryDate`,
-        [name, phone, plan, startDate, expiryDate],
+        ON CONFLICT(phone) DO NOTHING
+        `,
+        [
+          name,
+          phone,
+          plan,
+          startDate,
+          expiryDate
+        ],
         (err) => {
-          if (err) console.log("DB ERROR:", err.message);
+
+          if (err) {
+
+            console.log(
+              "DB ERROR:",
+              err.message
+            );
+
+          }
+
         }
       );
 
@@ -120,7 +166,10 @@ async function syncGoogleSheet() {
 
   } catch (err) {
 
-    console.log("SYNC ERROR:", err.message);
+    console.log(
+      "SYNC ERROR:",
+      err.message
+    );
 
   }
 
