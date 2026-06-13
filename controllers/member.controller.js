@@ -300,8 +300,6 @@ exports.getDashboardStats = (req, res) => {
 
 };
 
-
-
 /* ================= MONTHLY REVENUE ================= */
 
 exports.getMonthlyRevenue = (req, res) => {
@@ -310,31 +308,50 @@ exports.getMonthlyRevenue = (req, res) => {
     `
     SELECT amount, paymentDate
     FROM payments
+    WHERE paymentDate IS NOT NULL
     ORDER BY paymentDate ASC
     `,
     [],
     (err, rows) => {
 
       if (err) {
+
+        console.log(
+          "MONTHLY REVENUE ERROR:",
+          err
+        );
+
         return res.status(500).json(err);
+
       }
+
+      console.log(
+        "PAYMENTS FOUND:",
+        rows.length
+      );
 
       const revenue = {};
 
-      rows.forEach(payment => {
-
-        if (!payment.paymentDate) return;
+      rows.forEach((payment) => {
 
         const month =
           payment.paymentDate.substring(0, 7);
 
         if (!revenue[month]) {
+
           revenue[month] = 0;
+
         }
 
-        revenue[month] += payment.amount || 0;
+        revenue[month] +=
+          Number(payment.amount) || 0;
 
       });
+
+      console.log(
+        "MONTHLY REVENUE:",
+        revenue
+      );
 
       res.json(revenue);
 
