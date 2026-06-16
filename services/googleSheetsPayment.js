@@ -6,6 +6,11 @@ const credentials = JSON.parse(
   process.env.GOOGLE_CREDENTIALS
 );
 
+console.log(
+  "GOOGLE PROJECT:",
+  credentials.project_id
+);
+
 const auth = new google.auth.GoogleAuth({
   credentials,
   scopes: [
