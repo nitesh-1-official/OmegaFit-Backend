@@ -149,6 +149,22 @@ exports.addMember = (req, res) => {
           startDate
         ]
       );
+      addPayment(
+  startDate,
+  name,
+  phone,
+  plan,
+  amount,
+  "Admission"
+)
+.catch(err => {
+
+  console.log(
+    "GOOGLE SHEET ADMISSION ERROR:",
+    err.message
+  );
+
+});
 
       res.json({
         message: "Member added",
