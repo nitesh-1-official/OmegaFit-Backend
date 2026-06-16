@@ -2,9 +2,25 @@ const { google } = require("googleapis");
 
 console.log("GOOGLE PAYMENT SERVICE LOADED");
 
-const credentials = JSON.parse(
-  process.env.GOOGLE_CREDENTIALS
-);
+let credentials;
+
+/* Render */
+
+if (process.env.GOOGLE_CREDENTIALS) {
+
+  credentials = JSON.parse(
+    process.env.GOOGLE_CREDENTIALS
+  );
+
+} else {
+
+  /* Local PC */
+
+  credentials = require(
+    "../credentials/omegafit-service-account.json"
+  );
+
+}
 
 console.log(
   "GOOGLE PROJECT:",
