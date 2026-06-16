@@ -232,15 +232,21 @@ exports.renewMember = (req, res) => {
   `;
 
   db.run(
-    updateQuery,
-    [plan, renewalDate, expiryDate, id],
-    function(err) {
+  updateQuery,
+  [plan, renewalDate, expiryDate, id],
+  function(err) {
 
-      if (err) {
-        return res.status(500).json(err);
-      }
+    if (err) {
+      return res.status(500).json(err);
+    }
 
-      db.get(
+    console.log("MEMBER ID:", id);
+    console.log("PLAN:", plan);
+    console.log("START:", renewalDate);
+    console.log("EXPIRY:", expiryDate);
+    console.log("ROWS UPDATED:", this.changes);
+
+    db.get(
   "SELECT name, phone FROM members WHERE id = ?",
         [id],
         (err, member) => {
