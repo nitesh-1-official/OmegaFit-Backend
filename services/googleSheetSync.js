@@ -2,8 +2,19 @@ const axios = require("axios");
 const { parse } = require("csv-parse/sync");
 const db = require("../database/db");
 
+const {
+  addPayment
+} = require("./googleSheetsPayment");
+
 const SHEET_URL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vTkHRfjAqK_7Kg0gJDtmSM4vcAlbW1PYMf3Im4fJSJPkqDEDM7doqVo5mp0UXEjj8-C8ionXAxKaBbE/pub?output=csv";
+
+const planPrices = {
+  1: 800,
+  3: 2250,
+  6: 4200,
+  12: 7800
+};
 
 /* Parse DD/MM/YYYY timestamp */
 
@@ -15,7 +26,9 @@ function parseTimestamp(ts) {
 
     if (ts.includes("/")) {
 
-      const [datePart, timePart] = ts.split(" ");
+      const [datePart, timePart] =
+        ts.split(" ");
+
       const [day, month, year] =
         datePart.split("/").map(Number);
 
@@ -146,7 +159,7 @@ async function syncGoogleSheet() {
           startDate,
           expiryDate
         ],
-        (err) => {
+        function(err) {
 
           if (err) {
 
@@ -154,6 +167,42 @@ async function syncGoogleSheet() {
               "DB ERROR:",
               err.message
             );
+
+            return;
+
+          }
+
+          /* New member inserted */
+
+          if (this.changes > 0) {
+
+            const amount =
+              planPrices[plan] || 0;
+
+            addPayment(
+              startDate,
+              name,
+              phone,
+              plan,
+              amount,
+              "Admission"
+            )
+            .then(() => {
+
+              console.log(
+                "ADMISSION PAYMENT WRITTEN:",
+                name
+              );
+
+            })
+            .catch((err) => {
+
+              console.log(
+                "PAYMENT SHEET ERROR:",
+                err.message
+              );
+
+            });
 
           }
 
