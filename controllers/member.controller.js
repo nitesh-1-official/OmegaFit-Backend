@@ -1,8 +1,13 @@
 
 const db = require("../database/db");
 
-const addPayment =
-require("../services/googleSheetsPayment");
+const {
+  addPayment,
+  auth,
+  SPREADSHEET_ID
+} = require("../services/googleSheetsPayment");
+
+const { google } = require("googleapis");
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -352,62 +357,108 @@ exports.getDashboardStats = (req, res) => {
 };
 
 /* ================= MONTHLY REVENUE ================= */
-exports.getMonthlyRevenue = (req, res) => {
+exports.getMonthlyRevenue = async (req, res) => {
 
-  db.all(
-    "SELECT * FROM payments",
-    [],
-    (err, rows) => {
+  try {
 
-      if (err) {
-        return res.status(500).json(err);
-      }
+    const client = await auth.getClient();
 
-      console.log("PAYMENTS TABLE:", rows);
+    const sheets = google.sheets({
+      version: "v4",
+      auth: client
+    });
 
-      const revenue = {};
-
-      rows.forEach((payment) => {
-
-        const month =
-          payment.paymentDate.substring(0, 7);
-
-        revenue[month] =
-          (revenue[month] || 0) +
-          Number(payment.amount);
-
+    const response =
+      await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: "Payments!A:F"
       });
 
-      console.log("REVENUE:", revenue);
+    const rows =
+      response.data.values || [];
 
-      res.json(revenue);
+    const revenue = {};
 
-    }
-  );
+    rows.slice(1).forEach((row) => {
+
+      const paymentDate =
+        row[0] || "";
+
+      const amount =
+        Number(row[4] || 0);
+
+      if (!paymentDate) return;
+
+      const month =
+        paymentDate.substring(0, 7);
+
+      revenue[month] =
+        (revenue[month] || 0) + amount;
+
+    });
+
+    res.json(revenue);
+
+  } catch (err) {
+
+    console.log(
+      "MONTHLY REVENUE ERROR:",
+      err
+    );
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
 
 };
 /* ================= PAYMENT HISTORY ================= */
 
-exports.getPayments = (req, res) => {
+exports.getPayments = async (req, res) => {
 
-  db.all(
-    "SELECT * FROM payments ORDER BY paymentDate DESC",
-    [],
-    (err, rows) => {
+  try {
 
-      if (err) {
+    const client = await auth.getClient();
 
-        console.log("================================");
-        console.log("PAYMENTS ERROR:");
-        console.log(err);
-        console.log("================================");
+    const sheets = google.sheets({
+      version: "v4",
+      auth: client
+    });
 
-        return res.status(500).json(err);
-      }
+    const response =
+      await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: "Payments!A:F"
+      });
 
-      res.json(rows);
+    const rows =
+      response.data.values || [];
 
-    }
-  );
+    const payments =
+      rows.slice(1).map((row, index) => ({
+        id: index + 1,
+        paymentDate: row[0] || "",
+        memberName: row[1] || "",
+        phone: row[2] || "",
+        plan: Number(row[3] || 0),
+        amount: Number(row[4] || 0),
+        type: row[5] || ""
+      }));
+
+    res.json(payments);
+
+  } catch (err) {
+
+    console.log(
+      "GET PAYMENTS ERROR:",
+      err
+    );
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
 
 };
