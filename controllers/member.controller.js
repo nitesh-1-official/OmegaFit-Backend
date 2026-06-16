@@ -190,7 +190,7 @@ exports.renewMember = (req, res) => {
   const id = req.params.id;
 
   const { plan, startDate } = req.body;
-  
+
   if (!plan) {
     return res.status(400).json({
       message: "Plan required"
