@@ -2,8 +2,12 @@ const { google } = require("googleapis");
 
 console.log("GOOGLE PAYMENT SERVICE LOADED");
 
+const credentials = JSON.parse(
+  process.env.GOOGLE_CREDENTIALS
+);
+
 const auth = new google.auth.GoogleAuth({
-  keyFile: "./credentials/omegafit-service-account.json",
+  credentials,
   scopes: [
     "https://www.googleapis.com/auth/spreadsheets"
   ]
