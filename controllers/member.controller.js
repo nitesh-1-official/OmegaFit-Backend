@@ -231,6 +231,8 @@ exports.renewMember = (req, res) => {
 
 /* SQLite */
 
+/* SQLite */
+
 db.run(
   `
   INSERT INTO payments
@@ -243,7 +245,26 @@ db.run(
     plan,
     amount,
     renewalDate
-  ]
+  ],
+  function(err) {
+
+    if (err) {
+
+      console.log(
+        "PAYMENT INSERT ERROR:",
+        err
+      );
+
+    } else {
+
+      console.log(
+        "PAYMENT INSERTED:",
+        this.lastID
+      );
+
+    }
+
+  }
 );
 
 /* Google Sheets */
