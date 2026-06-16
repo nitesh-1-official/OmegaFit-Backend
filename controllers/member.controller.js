@@ -1,4 +1,8 @@
+
 const db = require("../database/db");
+
+const addPayment =
+require("../services/googleSheetsPayment");
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -181,10 +185,12 @@ exports.deleteMember = (req, res) => {
 
 exports.renewMember = (req, res) => {
 
+  console.log("RENEW ROUTE HIT");
+
   const id = req.params.id;
 
   const { plan, startDate } = req.body;
-
+  
   if (!plan) {
     return res.status(400).json({
       message: "Plan required"
@@ -214,29 +220,53 @@ exports.renewMember = (req, res) => {
       }
 
       db.get(
-        "SELECT name FROM members WHERE id = ?",
+  "SELECT name, phone FROM members WHERE id = ?",
         [id],
         (err, member) => {
 
           if (!err && member) {
 
-            const amount =
-              getPlanAmount(plan);
+           const amount =
+  getPlanAmount(plan);
 
-            db.run(
-              `
-              INSERT INTO payments
-              (memberId, memberName, plan, amount, paymentDate)
-              VALUES (?, ?, ?, ?, ?)
-              `,
-              [
-                id,
-                member.name,
-                plan,
-                amount,
-                renewalDate
-              ]
-            );
+/* SQLite */
+
+db.run(
+  `
+  INSERT INTO payments
+  (memberId, memberName, plan, amount, paymentDate)
+  VALUES (?, ?, ?, ?, ?)
+  `,
+  [
+    id,
+    member.name,
+    plan,
+    amount,
+    renewalDate
+  ]
+);
+
+/* Google Sheets */
+
+addPayment(
+  renewalDate,
+  member.name,
+  member.phone,
+  plan,
+  amount,
+  "Renewal"
+)
+.then(() => {
+  console.log(
+    "PAYMENT WRITTEN TO GOOGLE SHEET"
+  );
+})
+.catch((err) => {
+  console.log(
+    "GOOGLE SHEET PAYMENT ERROR:",
+    err.message
+  );
+}); 
 
           }
 
