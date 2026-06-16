@@ -72,4 +72,8 @@ async function addPayment(
 
 }
 
-module.exports = addPayment;
+module.exports = {
+  addPayment,
+  auth,
+  SPREADSHEET_ID
+};
