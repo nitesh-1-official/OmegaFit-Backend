@@ -21,6 +21,8 @@ app.use("/api/members", memberRoutes);
 
 /* ---------------- Test Routes ---------------- */
 
+/* ---------------- Test Routes ---------------- */
+
 app.get("/", (req, res) => {
   res.send("OmegaFit Backend Running");
 });
@@ -28,6 +30,48 @@ app.get("/", (req, res) => {
 app.get("/test", (req, res) => {
   res.json({ success: true });
 });
+
+app.get("/db-check", (req, res) => {
+
+  db.all(
+    "PRAGMA table_info(members)",
+    [],
+    (err, rows) => {
+
+      if (err) {
+        return res.json(err);
+      }
+
+      res.json(rows);
+
+    }
+  );
+
+});
+
+app.get("/duplicate-check", (req, res) => {
+
+  db.all(
+    `
+    SELECT phone, COUNT(*) as total
+    FROM members
+    GROUP BY phone
+    HAVING COUNT(*) > 1
+    `,
+    [],
+    (err, rows) => {
+
+      if (err) {
+        return res.json(err);
+      }
+
+      res.json(rows);
+
+    }
+  );
+
+});
+
 
 /* ---------------- Google Sheet Sync ---------------- */
 
