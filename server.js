@@ -1,6 +1,6 @@
-
 const express = require("express");
 console.log("SERVER FILE LOADED");
+
 const cors = require("cors");
 
 const db = require("./database/db");
@@ -18,8 +18,6 @@ app.use(express.json());
 /* ---------------- Routes ---------------- */
 
 app.use("/api/members", memberRoutes);
-
-/* ---------------- Test Routes ---------------- */
 
 /* ---------------- Test Routes ---------------- */
 
@@ -71,6 +69,7 @@ app.get("/duplicate-check", (req, res) => {
   );
 
 });
+
 app.get("/member-id/:id", (req, res) => {
 
   db.get(
@@ -88,6 +87,7 @@ app.get("/member-id/:id", (req, res) => {
   );
 
 });
+
 app.get("/member-check/:phone", (req, res) => {
 
   db.all(
@@ -105,6 +105,7 @@ app.get("/member-check/:phone", (req, res) => {
   );
 
 });
+
 app.get("/schema-check", (req, res) => {
 
   db.all(
@@ -126,17 +127,29 @@ app.get("/schema-check", (req, res) => {
   );
 
 });
+
 /* ---------------- Google Sheet Sync ---------------- */
 
+/*
 setInterval(() => {
-  console.log("Running Google Sheet Sync...");
+
+  console.log(
+    "Running Google Sheet Sync..."
+  );
+
   syncGoogleSheet();
+
 }, 30000);
+*/
 
 /* ---------------- Start Server ---------------- */
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`OmegaFit backend running on port ${PORT}`);
+
+  console.log(
+    `OmegaFit backend running on port ${PORT}`
+  );
+
 });
