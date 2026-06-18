@@ -172,39 +172,55 @@ async function syncGoogleSheet() {
 
           }
 
-          /* New member inserted */
+          /* Existing member */
 
-          if (this.changes > 0) {
+          if (this.changes === 0) {
 
-            const amount =
-              planPrices[plan] || 0;
-
-            addPayment(
-              startDate,
+            console.log(
+              "MEMBER ALREADY EXISTS:",
               name,
-              phone,
-              plan,
-              amount,
-              "Admission"
-            )
-            .then(() => {
+              phone
+            );
 
-              console.log(
-                "ADMISSION PAYMENT WRITTEN:",
-                name
-              );
-
-            })
-            .catch((err) => {
-
-              console.log(
-                "PAYMENT SHEET ERROR:",
-                err.message
-              );
-
-            });
+            return;
 
           }
+
+          /* New member inserted */
+
+          console.log(
+            "NEW MEMBER INSERTED:",
+            name,
+            phone
+          );
+
+          const amount =
+            planPrices[plan] || 0;
+
+          addPayment(
+            startDate,
+            name,
+            phone,
+            plan,
+            amount,
+            "Admission"
+          )
+          .then(() => {
+
+            console.log(
+              "ADMISSION PAYMENT WRITTEN:",
+              name
+            );
+
+          })
+          .catch((err) => {
+
+            console.log(
+              "PAYMENT SHEET ERROR:",
+              err.message
+            );
+
+          });
 
         }
       );
