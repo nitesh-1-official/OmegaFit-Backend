@@ -105,7 +105,27 @@ app.get("/member-check/:phone", (req, res) => {
   );
 
 });
+app.get("/schema-check", (req, res) => {
 
+  db.all(
+    `
+    SELECT sql
+    FROM sqlite_master
+    WHERE name = 'members'
+    `,
+    [],
+    (err, rows) => {
+
+      if (err) {
+        return res.json(err);
+      }
+
+      res.json(rows);
+
+    }
+  );
+
+});
 /* ---------------- Google Sheet Sync ---------------- */
 
 setInterval(() => {
