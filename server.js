@@ -71,7 +71,23 @@ app.get("/duplicate-check", (req, res) => {
   );
 
 });
+app.get("/member-check/:phone", (req, res) => {
 
+  db.all(
+    "SELECT * FROM members WHERE phone = ?",
+    [req.params.phone],
+    (err, rows) => {
+
+      if (err) {
+        return res.json(err);
+      }
+
+      res.json(rows);
+
+    }
+  );
+
+});
 
 /* ---------------- Google Sheet Sync ---------------- */
 
