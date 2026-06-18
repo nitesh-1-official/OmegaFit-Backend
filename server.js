@@ -71,6 +71,23 @@ app.get("/duplicate-check", (req, res) => {
   );
 
 });
+app.get("/member-id/:id", (req, res) => {
+
+  db.get(
+    "SELECT * FROM members WHERE id = ?",
+    [req.params.id],
+    (err, row) => {
+
+      if (err) {
+        return res.json(err);
+      }
+
+      res.json(row);
+
+    }
+  );
+
+});
 app.get("/member-check/:phone", (req, res) => {
 
   db.all(
